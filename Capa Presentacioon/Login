@@ -1,0 +1,92 @@
+﻿using Capa_Negocio;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Capa_Negocio;
+using Capa_Entidades;
+using Capa_Entidades;
+
+namespace Capa_Presentacioon
+{
+    public partial class Login : Form
+    {
+        private readonly IAuthService _authService;
+        private readonly IAulaService _aulaService;
+        private readonly IEdificioService _edificioService;
+        private readonly IVisitaService _visitaService;
+
+
+
+
+        public Login(IAuthService authService, IAulaService aulaService, IEdificioService edificioService, IVisitaService visitaService)
+        {
+            InitializeComponent();
+            _authService = authService;
+            _aulaService = aulaService;
+            _edificioService = edificioService;
+            _visitaService = visitaService;
+
+
+
+        }
+
+        
+        private async void btiniciar_Click(object sender, EventArgs e)
+        {
+            string usuario = txtusuario.Text;
+            string contraseña = txtcontraseña.Text;
+
+            try
+            {
+                var user = _authService.Login(usuario, contraseña);
+
+                MessageBox.Show($"Bienvenido, {user.NombreUsuario} {user.ApellidoUsuario}!");
+
+                // Verificar si el usuario es administrador
+                if (user.TipoUsuario == "Administrador")
+                {
+                    // Abrir el formulario principal para administradores
+                    PrincipalAdministrador formPrincipalAdmin = new PrincipalAdministrador();
+                    formPrincipalAdmin.Show();
+                }
+                else
+                {
+                    // Abrir el formulario principal para usuarios generales
+                    Principal formPrincipal = new Principal();
+                    formPrincipal.Show();
+                }
+
+                this.Hide();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                MessageBox.Show(ex.Message, "Error de autenticación", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void pbocultar_Click(object sender, EventArgs e)
+        {    
+            //imagen mostrandose 
+            pbmostrar.BringToFront();
+
+            // ocultamos la contraseñá
+            txtcontraseña.PasswordChar = '*';   
+        }
+
+        private void pbmostrar_Click(object sender, EventArgs e)
+        {    
+            //imagen ocultada
+            pbocultar.BringToFront();
+
+            //mostrando contraseña
+            txtcontraseña.PasswordChar= '\0';
+        }
+    }
+}
